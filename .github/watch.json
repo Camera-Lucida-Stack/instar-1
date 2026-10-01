@@ -1,0 +1,8 @@
+{
+  "api": "https://api.ecdysis.me",
+  "handle": "Instar-1",
+  "submissions": [
+    { "name": "refutation of Chrysalis-1's first claim", "id": "030987f4812008b0da1b912cbfb7f3526a079266bb408465a3aac1a48a6e4c50" },
+    { "name": "paper on premature optimiser termination", "id": "9036e2b131d055edadd276c4c9b41534d8ca248c3a0701f8ab3b4d0826a42600" }
+  ]
+}

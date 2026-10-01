@@ -1,0 +1,69 @@
+# Watches Ecdysis for Instar-1 and opens an issue (which GitHub emails to the
+# owner) when there is something for the operator to do. Read-only towards
+# Ecdysis: it uses no keys and files nothing.
+name: Ecdysis watch
+
+on:
+  schedule:
+    - cron: "17 */4 * * *"   # every four hours
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Open a test notification"
+        type: boolean
+        default: false
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        env:
+          TEST: ${{ github.event.inputs.test }}
+        with:
+          script: |
+            const fs = require("fs");
+            const cfg = JSON.parse(fs.readFileSync(".github/watch.json", "utf8"));
+            const api = cfg.api, handle = cfg.handle;
+            const get = async (p) => { const r = await fetch(api + p); return { status: r.status, body: await r.json().catch(() => ({})) }; };
+
+            // Existing notices, so nothing is reported twice.
+            const existing = await github.paginate(github.rest.issues.listForRepo,
+              { owner: context.repo.owner, repo: context.repo.repo, state: "all", labels: "ecdysis", per_page: 100 });
+            const seen = new Set(existing.map((i) => (i.body || "").match(/key:([^\s>]+)/)?.[1]).filter(Boolean));
+            const notify = async (key, title, body) => {
+              if (seen.has(key)) return;
+              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo,
+                title, labels: ["ecdysis"], body: `${body}\n\n<!-- key:${key} -->` });
+              seen.add(key); core.info(`notified: ${title}`);
+            };
+
+            if (process.env.TEST === "true") {
+              await notify(`test:${Date.now()}`, "Ecdysis watch: test notification",
+                "This is a test. The watch is working, and you will be emailed like this when Instar-1 has jury duty or a submission is decided. You can close this issue.");
+            }
+
+            // 1. Jury seats.
+            const hb = await get(`/v1/heartbeat?agent=${encodeURIComponent(handle)}`);
+            if (hb.status !== 200) core.warning(`heartbeat returned ${hb.status}`);
+            for (const s of hb.body.jury_duty ?? []) {
+              const when = new Date(s.seatDeadline).toUTCString();
+              await notify(`jury:${s.subject}`, `Instar-1 has jury duty: deadline ${when}`,
+                `Instar-1 has been drawn to judge a ${s.kind}.\n\nCase id: \`${s.subject}\`\nDeadline: **${when}** (48 hours from seating; missing it loses the seat).\n\nNext step: open your Codespace and ask Claude to take you through the case.`);
+            }
+
+            // 2. Decisions on Instar-1's own submissions.
+            for (const sub of cfg.submissions) {
+              const r = await get(`/v1/review/${sub.id}`);
+              if (r.status !== 200) { core.warning(`${sub.name}: status ${r.status}`); continue; }
+              const st = r.body.status;
+              if (st === "pending") { core.info(`${sub.name}: ${r.body.note}`); continue; }
+              const words = { released: "accepted and published", rejected: "rejected by its jury", hazard_hold: "held for an operator decision" }[st] ?? st;
+              await notify(`decision:${sub.id}:${st}`, `Instar-1's ${sub.name} was ${words}`,
+                `Ecdysis reports that Instar-1's ${sub.name} was **${words}**.\n\nReview id: \`${sub.id}\`\nPlatform note: ${r.body.note}\n\nNext step: ask Claude to ${st === "released" ? "verify the entry against the log key" : "read the jury's reasons with you"}.`);
+            }
