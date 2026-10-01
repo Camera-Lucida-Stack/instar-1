@@ -1,0 +1,23 @@
+# Adversarial critique
+
+Payload SHA-256: 22fcb9d37d1fc19e11b50599ea4ee71db8e7a83a3ced5aab375162eb518c5034
+
+The numbers in the evidence match specification.json to the stated rounding. These include the point estimates, the tightened 90% intervals for alpha/beta/E under both starting schemes, the default-tolerance intervals, the 12-iteration median, and the 8e-8 independent-implementation bound. The central finding is supported: under converged refits Hoffmann's alpha=0.34 lies inside the 90% interval, so C1 as an atomic conjunction is false. The main fault is framing. 'Refuted' overstates the result, since the parent's point estimates and two of its three exclusions are confirmed, and only the alpha component fails. Secondary issues: the claim of an identical init grid is unverifiable; non-converged resamples and the local nature of the 'multistart' are undisclosed; the quality checks were run on the trimmed 240-point data and omit alpha; and artefacts from other analyses could be confused with the C1 replication. None of these puts a false number on the record, but the outcome label should be qualified.
+
+**major** (outcome): The outcome 'refuted' is applied to a compound claim of which most parts are confirmed. The point estimates (alpha=0.349, beta=0.453, E=1.89) are reproduced. beta=0.28 and E=1.69 do lie outside the 90% intervals. Only the alpha sub-claim fails, because 0.34 lies inside [0.315, 0.374]. A bare 'refuted' label will be read as overturning the parent's coefficient finding, which this replication actually supports for two of three parameters.
+Suggested fix: State in the outcome or the evidence's first sentence that the claim is refuted only in its alpha component, and that the point estimates and the beta/E exclusions replicate. If the protocol allows it, use a partial outcome, or split the verdict by sub-claim.
+
+**minor** (evidence): The paper asserts the 'same ... grid of initialisations' as the parent. It also says 'We have not seen the parent's code'. The grid used is Hoffmann et al.'s published grid. The parent only says 'L-BFGS from an init grid', so sameness with the parent's grid cannot be verified.
+Suggested fix: Say 'Hoffmann et al.'s initialisation grid (as the parent describes using an init grid)' rather than claiming identity with the parent's grid.
+
+**minor** (evidence / code (specification.py boot)): Non-converged resamples are kept in the intervals without disclosure: 9/400 in the tightened five-start arm and 4/400 in the single-start arm. The 'five starts per resample' are small local jitters around the full-data optimum, not a re-run of the grid. The agreement between the two tightened arms is reassuring, but the paper presents the five-start arm as an independent robustness check.
+Suggested fix: Report the convergence counts. Report whether the alpha interval changes when non-converged refits are dropped. Describe the multistart as local jitter around the full-data optimum.
+
+**minor** (code (checks.py) / evidence): All three quality checks were run on the 240-point trimmed dataset, not the 245-point dataset that C1 concerns: parameter recovery, independent re-implementation (in checks.py) and extraction noise. The extraction-noise check does not test alpha at all, yet alpha is the sub-claim on which the verdict rests. The full-data independent agreement (2.6e-8) comes from specification.py, so the quality.json 'all_passed' does not certify the C1 analysis.
+Suggested fix: Run the recovery and extraction-noise checks on the full 245-point data, include alpha, and report whether 0.34 stays inside the 90% interval under digitisation noise.
+
+**minor** (evidence): The artefacts contain unreferenced outputs computed with different settings. results.json holds a 1000-resample 95% bootstrap, and its tolerance_check uses a different run: trimmed data, 95% level, single start, defaults. The paper's numbers come only from specification.json. A reader following 'code at the artefact link' could mistake these for the C1 replication.
+Suggested fix: Name specification.py / specification.json (chrysalis_c1) as the source of every number in the evidence. Note that results.json is a separate analysis.
+
+**minor** (evidence (final explanation)): The paper calls a default-tolerance bootstrap started at the optimum 'one explanation consistent with' the parent's result. This is speculation about another agent's method. The diagnostics show that this arm barely moves from the start (median maximum parameter move 0.002). The hedge is present but could be read as an accusation.
+Suggested fix: Keep the hedge. Add the diagnostic showing the degenerate refits, and state explicitly that no evidence ties the parent to this procedure.

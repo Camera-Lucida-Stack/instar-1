@@ -1,0 +1,26 @@
+# Adversarial critique
+
+Payload SHA-256: 774285cb868361fd4609d794aaeb48831b0ca80cfddc77e66ed4930041309688
+
+The numbers quoted in the evidence match specification.json: point estimates, tightened 90% intervals for alpha, beta and E, the default-tolerance alpha interval, the seed and the data hash. The core observation, that alpha=0.34 falls inside a properly converged 90% bootstrap interval, is supported. However, the outcome 'refuted' overstates the finding. C1's point estimates and its beta/E exclusions replicate, and only the alpha conjunct fails. The causal attribution to premature termination in Chrysalis-1's bootstrap is speculation, since Chrysalis-1's code and intervals were never examined. The supporting bootstrap code does not check convergence and refits each resample from a single start, despite the stated use of the same initialisation grid. The default-tolerance bootstrap is visibly degenerate (A barely moves from its start), yet it is presented as 'reproducing the claim' without that caveat. The quality checks validate a different 240-point specification rather than the 245-point setting used here.
+
+**major** (outcome): The label 'refuted' overstates the result. C1 is a conjunction. Its point estimates (alpha=0.349, beta=0.453, E=1.89) replicate exactly, and beta=0.28 and E=1.69 lie outside the tightened 90% intervals, as C1 says. Only the alpha component fails. The substantive content (the published beta and E are inconsistent with the refit) is confirmed, and readers seeing 'refuted' will infer the opposite.
+Suggested fix: Use a partial or qualified outcome if the protocol allows one. Otherwise state prominently that the point estimates and the beta/E exclusion replicate, and that only alpha=0.34 falls inside the interval.
+
+**major** (evidence (cause attribution)): 'The likely cause is premature termination of the bootstrap refits' is inferred without inspecting Chrysalis-1's code or settings. The replication shows that default L-BFGS-B tolerances also yield a collapsed interval. It does not show that Chrysalis-1 used default tolerances. Chrysalis-1's intervals are not reported, so the only match is the binary inside/outside pattern, which many other mechanisms could also produce.
+Suggested fix: Present this as a hypothesis consistent with the data, or obtain Chrysalis-1's interval endpoints or optimiser settings and compare them directly.
+
+**major** (code (lib/chinchilla.py bootstrap)): The bootstrap does not check convergence or success, and does not filter non-finite results. Each resample is refit from a single start (the full-data optimum) rather than the grid of initialisations the paper says it shares with the original. Single-start refits can land in different local minima or stop at maxiter, which can distort the tightened interval on which the refutation rests. The B interval, which reaches about 2.4e5 in the 95% run, indicates flat or ill-conditioned directions where this matters.
+Suggested fix: Record res.success and nit for every refit and report the number of failures. Rerun the tightened 90% bootstrap with multi-start or grid refits per resample. Show that the alpha lower bound stays below 0.34.
+
+**major** (evidence (diagnosis of default-tolerance run)): The default-tolerance interval for A is [495.62, 495.82], essentially the starting value. This shows that the refits barely moved from p0, so that bootstrap is degenerate. The paper treats this as 'reproducing the claim' without stating that it is not a valid uncertainty estimate. It also omits the mechanism: a summed objective of about 0.002 relative to the default ftol makes the stopping test trigger almost immediately.
+Suggested fix: State explicitly that the default-tolerance bootstrap is degenerate, with near-zero parameter movement. Report per-resample iteration counts as evidence of premature termination.
+
+**minor** (evidence ('same ... grid of initialisations')): Chrysalis-1 does not specify its initialisation grid in the parent record, so the assertion that the grids are the same cannot be verified. specification.py's own 245-point fits use a fine grid for p0 but no grid in the bootstrap.
+Suggested fix: Say that a Hoffmann-style grid was used and that equivalence with Chrysalis-1's grid is assumed.
+
+**minor** (artefacts / quality.json): All quality checks (parameter recovery, re-implementation, extraction noise) are run on the 240-point trimmed fit, not on the 245-point setting used for this replication. results.json's tolerance_check also uses trimmed data and 95% intervals. None of the validation directly supports the numbers in this paper.
+Suggested fix: Run parameter recovery and independent re-implementation on the 245-point data, or state that validation was performed on a different subset.
+
+**minor** (evidence (Monte Carlo precision)): The intervals use only 400 resamples. No Monte Carlo error is given for the 5th-percentile alpha bound (0.315) relative to the margin of 0.025 to 0.34. The margin is probably adequate given a bootstrap SE of about 0.017, but this is not shown.
+Suggested fix: Report the Monte Carlo SE of the percentile endpoints, or confirm the result with more resamples. The existing 1000-resample 95% interval [0.312, 0.375] could be cited as corroboration.

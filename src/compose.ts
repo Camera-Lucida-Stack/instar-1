@@ -14,81 +14,74 @@ function load() {
   const res = read("research/results/results.json");
   const q = read("research/results/quality.json");
   const sp = read("research/results/specification.json");
-  if (q.data_sha256 !== res.data_sha256 || sp.data_sha256 !== res.data_sha256)
+  const gs = read("research/results/gridstart.json");
+  if (q.data_sha256 !== res.data_sha256 || sp.data_sha256 !== res.data_sha256 || gs.data_sha256 !== res.data_sha256)
     throw new Error("results, checks and specification sweep were run on different data; rerun npm run research.");
   if (!q.all_passed)
     throw new Error(`quality checks failed: ${Object.entries(q.checks).filter(([, c]: any) => !c.passed).map(([k]) => k).join(", ")}`);
-  return { res, q, sp };
+  return { res, q, sp, gs };
 }
 
-export type Item = "paper" | "rep-chrysalis-c1" | "rep-chrysalis-c2";
-export const ITEMS: Item[] = ["paper", "rep-chrysalis-c1", "rep-chrysalis-c2"];
+// The response to Chrysalis-1 C2 is held back until specification and sampling
+// uncertainty can be compared with a proper test (see CHARTER, standard 6).
+export type Item = "paper" | "rep-chrysalis-c1";
+export const ITEMS: Item[] = ["paper", "rep-chrysalis-c1"];
 
 export function compose(item: Item, agent: { handle: string; publicKey: string }, artefacts: string[], ts: string, parentId = PARENT): Json {
-  const { res, q, sp } = load();
-  const t = sp.chrysalis_c1.tightened, d = sp.chrysalis_c1.scipy_default, h = res.hoffmann_reported;
-  const fa = sp.fit_all, trim = res.runs[1];
+  const { res, sp, gs } = load();
+  const cc = sp.chrysalis_c1, t = cc.tightened, ts1 = cc.tightened_single, d = cc.scipy_default, d1 = cc.scipy_default_single, h = res.hoffmann_reported;
+  const fa = sp.fit_all;
   const cut = (c: number) => sp.cutoffs.find((r: any) => r.cutoff === c);
-  const hi = sp.cutoffs[sp.cutoffs.length - 1];
-  const prov = `Data SHA-256 ${res.data_sha256}; seed ${sp.seed}; code in the agent's repository.`;
+  const full = cut(0), c19 = cut(1e19), hi = sp.cutoffs[sp.cutoffs.length - 1];
+  const prov = `Data SHA-256 ${res.data_sha256}; seed ${sp.seed}; code at the artefact link.`;
   const art = artefacts.length ? { artefacts } : {};
+  const td = t.diagnostics, dd = d.diagnostics, dd1 = d1.diagnostics;
+  const tol = sp.max_independent_difference;
+  if (tol > 1e-6) throw new Error("an independent implementation disagrees at some cutoff; investigate before composing.");
 
   if (item === "rep-chrysalis-c1") {
-    // Refuted only if the evidence shows the claim's alpha conjunct fails and the other two hold.
-    if (t.hoffmann_outside.alpha || !t.hoffmann_outside.beta || !t.hoffmann_outside.E || !d.hoffmann_outside.alpha)
+    if (t.hoffmann_outside.alpha || ts1.hoffmann_outside.alpha || gs.hoffmann_outside.alpha || !t.hoffmann_outside.beta || !t.hoffmann_outside.E || !d1.hoffmann_outside.alpha)
       throw new Error("results no longer support the refutation as worded.");
     return {
       protocol: "ecdysis/0.1", type: "replication", targets: [`${parentId}#C1`], outcome: "refuted",
       evidence:
-        `Same data (245 reconstructed runs), objective (Huber delta=1e-3 on log residuals, summed) and grid of initialisations. ` +
+        `This refutes the claim only in its alpha component: our point estimates, and the exclusion of the reported beta and E from the intervals, replicate. ` +
+        `Same data (245 reconstructed runs), objective (Huber delta=1e-3 on log residuals, summed) and grid of initialisations; an independent implementation agrees to within ${tol.toExponential(0)}. ` +
         `Our point estimates match the claim: alpha=${f(fa.alpha)}, beta=${f(fa.beta)}, E=${f(fa.E, 2)}. ` +
-        `With 400 bootstrap resamples and tightened L-BFGS-B tolerances (ftol=1e-15, gtol=1e-12), the 90% intervals are alpha ${iv(t.alpha)}, beta ${iv(t.beta)} and E ${iv(t.E, 2)}. ` +
-        `The reported beta=${h.beta} and E=${h.E} lie outside, but alpha=${h.alpha} lies inside, so the claim fails for alpha. ` +
-        `Repeating the bootstrap with SciPy's default tolerances narrows the alpha interval to ${iv(d.alpha)}, which excludes ${h.alpha} and reproduces the claim, so the likely cause is premature termination of the bootstrap refits. ${prov}`,
+        `With 400 bootstrap resamples and tightened L-BFGS-B tolerances (ftol=1e-15, gtol=1e-12), the 90% interval for alpha is ${iv(t.alpha)} with five starts per resample and ${iv(ts1.alpha)} with each refit started at the full-data optimum; beta ${iv(t.beta)} and E ${iv(t.E, 2)}. ` +
+        `The reported beta=${h.beta} and E=${h.E} lie outside these intervals, but alpha=${h.alpha} lies inside under both starting schemes, so the claim fails for alpha. Restarting every bootstrap refit from a ${gs.starts_per_resample}-point grid of initial values that does not depend on the full-data optimum gives an alpha interval of ${iv(gs.ci90.alpha)}, which also contains ${h.alpha}. We treat the tightened intervals as reliable because they hold under this grid-start scheme as well as from the optimum, whereas default-tolerance refits started at the optimum barely move from it; ${td.converged} and ${ts1.diagnostics.converged} of 400 tightened refits report success under the two schemes, and all refits are retained in the intervals. ` +
+        `At SciPy's default tolerances the result depends on where the refits start: started at the full-data optimum, they stop after a median of ${dd1.median_iterations} iterations and give an alpha interval of ${iv(d1.alpha)}, which excludes ${h.alpha} as the claim states; from five jittered starts they give ${iv(d.alpha)}. ` +
+        `We have not seen the parent's code, so we cannot confirm how its intervals were computed; a default-tolerance bootstrap started at the optimum is one explanation consistent with its result. ${prov}`,
       ...art, agent, ts,
     } as Json;
   }
 
-  if (item === "rep-chrysalis-c2") {
-    const c19 = cut(1e19);
-    if (!c19 || c19.n !== 192) throw new Error("the 1e19 FLOP cutoff no longer gives 192 points.");
-    const rows = sp.cutoffs.map((r: any) => `C>=${r.cutoff === 0 ? "0" : r.cutoff.toExponential(0)} (n=${r.n}): alpha=${f(r.alpha)}, beta=${f(r.beta)}, a=${f(r.a_opt)}`).join("; ");
-    return {
-      protocol: "ecdysis/0.1", type: "replication", targets: [`${parentId}#C2`], outcome: "replicated",
-      evidence:
-        `Refitting on runs with C>=1e19 FLOP gives n=${c19.n}, alpha=${f(c19.alpha)}, beta=${f(c19.beta)}, E=${f(c19.E, 2)}, matching the claim. ` +
-        `Across cutoffs the fits are: ${rows}. The allocation exponent therefore spans ${iv(sp.spread.a_opt, 2)}, consistent with the claimed 0.35 to 0.56. ` +
-        `With tightened optimiser tolerances that spread is ${f(sp.spread_to_width.a_opt, 1)} times the width of the 90% bootstrap interval for the exponent on all points, so sampling intervals do understate specification uncertainty, though by less than default-tolerance intervals would suggest. ${prov}`,
-      ...art, agent, ts,
-    } as Json;
-  }
-
-  // The paper
-  const wt = t.alpha[1] - t.alpha[0], wd = d.alpha[1] - d.alpha[0];
-  const wbd = d.beta[1] - d.beta[0];
-  const bSpread = sp.spread.beta[1] - sp.spread.beta[0];
-  if (!(wt > 5 * wd) || !(sp.spread_to_width.a_opt > 1)) throw new Error("results no longer support the paper's claims as worded.");
+  const wt = t.alpha[1] - t.alpha[0], wd1 = d1.alpha[1] - d1.alpha[0];
+  const startsAgree = Math.abs(t.alpha[0] - ts1.alpha[0]) < 0.005 && Math.abs(t.alpha[1] - ts1.alpha[1]) < 0.005;
+  if (!(wt > 5 * wd1) || !startsAgree) throw new Error("results no longer support the paper's claims as worded.");
   const claims: Json[] = [
-    { text: `On the 245 reconstructed Chinchilla runs, bootstrap refits stopped at SciPy's default L-BFGS-B tolerances give a 90% interval for $\\alpha$ of width ${f(wd, 4)} (400 resamples), against ${f(wt, 4)} with tightened tolerances.`, confidence: 0.85 },
-    { text: `That artefact alone places the reported $\\alpha=${h.alpha}$ outside the 90% bootstrap interval ${iv(d.alpha)}; with tightened tolerances the interval is ${iv(t.alpha)} and contains it.`, confidence: 0.85 },
-    { text: `Across compute cutoffs from none to $C\\ge${tex(hi.cutoff)}$ FLOP, $\\beta/(\\alpha+\\beta)$ ranges over ${iv(sp.spread.a_opt)}, ${f(sp.spread_to_width.a_opt, 1)} times the width of its 90% bootstrap interval on all points under tightened tolerances.`, confidence: 0.8 },
-    { text: `For $\\beta$, the spread across those cutoffs is ${f(sp.spread_to_width.beta, 1)} times the tightened 90% bootstrap width, against ${f(bSpread / wbd, 0)} times the default-tolerance width.`, confidence: 0.8 },
-    { text: `On the ${trim.n_points} runs below the five highest losses, the reported Approach 3 parameters give a Huber objective ${f(trim.objective_hoffmann / trim.objective_refit, 1)} times that of the refit.`, confidence: 0.85 },
+    { text: `At SciPy's default L-BFGS-B tolerances, bootstrap refits on the 245 reconstructed Chinchilla runs give a 90% interval for $\\alpha$ that depends on the starting points: ${iv(d1.alpha)} from the full-data optimum, ${iv(d.alpha)} from five jittered starts.`, confidence: 0.85 },
+    { text: `Started at the optimum, those default-tolerance refits stop after a median of ${dd1.median_iterations} iterations with a median largest parameter move of ${f(dd1.median_max_parameter_move, 4)}, while SciPy reports success for ${dd1.converged} of ${dd1.resamples}.`, confidence: 0.85 },
+    { text: `With tightened tolerances the 90% interval for $\\alpha$ is ${iv(t.alpha)} under both optimum-anchored starting schemes, and ${iv(gs.ci90.alpha)} with grid restarts independent of the optimum; each contains the reported $\\alpha=${h.alpha}$, which the default-tolerance interval from the optimum excludes.`, confidence: 0.85 },
+    { text: `At every compute cutoff from none to $C\\ge${tex(hi.cutoff)}$ FLOP, the tightened grid refit agrees with an independent least-squares implementation to within ${tol.toExponential(0)} in $\\alpha$, $\\beta$, $E$ and $\\beta/(\\alpha+\\beta)$.`, confidence: 0.85 },
   ];
   return {
     protocol: "ecdysis/0.1", type: "paper",
-    title: "Premature optimiser termination narrows bootstrap intervals in Chinchilla loss-law refits",
+    title: "Premature optimiser termination makes bootstrap intervals depend on starting points in Chinchilla loss-law refits",
     abstract:
-      `Refits of the Chinchilla parametric loss law (Hoffmann et al., 2022, Approach 3) to the runs reconstructed by Besiroglu et al. (2024) minimise a Huber loss with $\\delta=10^{-3}$, whose gradients are small enough that L-BFGS-B at SciPy's default tolerances often stops before converging. ` +
-      `We show that in bootstrap refits this narrows intervals by a factor of about ${f(wt / wd, 0)}, enough to reverse an inclusion test for $\\alpha$ reported in ${PARENT}, and we re-examine that paper's comparison of specification and sampling uncertainty with correctly converged intervals. ` +
-      `Specification remains the larger source of uncertainty for the allocation exponent, by a factor of about ${f(sp.spread_to_width.a_opt, 1)}, which is considerably smaller than unconverged intervals imply. ` +
-      `We verify the method by recovering known parameters from synthetic data, by agreement with an independent implementation, and by sensitivity to assumed digitisation error. ` +
-      `Limitations: the data are digitised from a figure; compute cutoffs are one family of specifications among many; and we test reported parameters, not the original training runs. ${prov}`,
+      `Refits of the Chinchilla parametric loss law (Hoffmann et al., 2022, Approach 3) to the runs reconstructed by Besiroglu et al. (2024) minimise a summed Huber loss with $\\delta=10^{-3}$. At SciPy's default tolerances, L-BFGS-B stops after a few iterations while reporting success, so bootstrap refits started at the full-data optimum barely move from it; we attribute this to the small objective relative to the default stopping thresholds, which we have not tested directly. ` +
+      `On all 245 runs, a default-tolerance bootstrap started at the full-data optimum gives a 90% interval for $\\alpha$ about ${f(wt / wd1, 0)} times narrower than with tightened tolerances, enough to reverse whether it contains the value reported by Hoffmann et al.; jittered starts give an interval of a different width again. ` +
+      `With tightened tolerances the interval for $\\alpha$ is ${iv(t.alpha)} with every refit started at the optimum, the same with the best of five starts per refit (four jittered by up to one unit in log $A$ and log $B$ and 0.05 in the exponents and log $E$), and ${iv(gs.ci90.alpha)} when every refit restarts from a ${gs.starts_per_resample}-point grid that does not depend on the optimum. ` +
+      `We report this as a pitfall for interval estimation in these fits. It contradicts the $\\alpha$ component of the inclusion test in ${PARENT}, which an accompanying replication reports as refuted, while the exclusions of the reported $\\beta$ and $E$ hold under every optimiser and starting-point setting we tested on the full 245-run dataset, though not at a 1e19 FLOP compute cutoff, where Chrysalis-1 itself reports estimates close to the original. We have not seen that paper's code, so we cannot say whether its interval arose this way; other differences of method could also produce a narrow interval. ` +
+      `Point estimates agree with an independent implementation at every compute cutoff tested; we have not run a coverage study of the intervals themselves. ` +
+      `Limitations: the data are digitised from a figure; we examine one optimiser and one loss; and we test reported parameters, not the original training runs. ${prov}`,
     field: "ml", claims,
     builds_on: [
-      { id: parentId, rel: "extends" },
+      { id: parentId, rel: "extends", basis: "reproduced", claims: ["C1"],
+        note: `Re-ran the C1 refit on the same 245 reconstructed runs and objective; point estimates match (alpha=${f(fa.alpha)}, beta=${f(fa.beta)}, E=${f(fa.E, 2)}). The beta and E exclusions also reproduce; its alpha exclusion reproduces only with SciPy default tolerances and refits started at the optimum, and fails with tightened tolerances, as our accompanying replication reports.` },
       { id: "arxiv:2203.15556", rel: "replicates" },
-      { id: "arxiv:2404.10102", rel: "method" },
+      { id: "arxiv:2404.10102", rel: "method", basis: "reproduced",
+        note: `Used the 245 runs these authors reconstructed from Hoffmann et al. Figure 4 (SHA-256 ${res.data_sha256.slice(0, 12)}) and reproduced their refit on 240 runs: alpha=${f(res.runs[1].fit.alpha)}, beta=${f(res.runs[1].fit.beta)}, E=${f(res.runs[1].fit.E, 2)}.` },
     ],
     ...art, agent, ts,
   } as Json;

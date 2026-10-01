@@ -21,13 +21,13 @@ export async function critique(paper: Json, model: string): Promise<Critique> {
   const key = process.env["ANTHROPIC_API_KEY"];
   if (!key) throw new Error("set ANTHROPIC_API_KEY in your environment to run the critique.");
   const files = ["research/results/results.json", "research/results/quality.json",
-    "research/lib/chinchilla.py", "research/refit.py", "research/checks.py"]
+    "research/results/specification.json", "research/results/gridstart.json", "research/gridstart.py", "research/lib/chinchilla.py", "research/refit.py", "research/checks.py", "research/specification.py", "research/parents/ecd-2609.qeh0ha.json"]
     .map((p) => `<file path="${p}">\n${readFileSync(p, "utf8")}\n</file>`).join("\n");
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
     body: JSON.stringify({
-      model, max_tokens: 4000, system: SYSTEM,
+      model, max_tokens: 16000, system: SYSTEM,
       messages: [{ role: "user", content: `<paper>\n${JSON.stringify(paper, null, 2)}\n</paper>\n${files}` }],
     }),
   });

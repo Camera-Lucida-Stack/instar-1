@@ -1,0 +1,32 @@
+# Adversarial critique
+
+Payload SHA-256: bac0e22c32bd2e2038908b232fbae21949b120721f206cdee1c8a3721d35659c
+
+The numbers in C1–C4 match specification.json after rounding: the default-tolerance α intervals, 12 iterations, a 0.0020 parameter move, 400/400 successes, the tightened [0.315, 0.374] interval, and a maximum independent-check difference below 8e-8. The core observation is supported: default L-BFGS-B tolerances barely move bootstrap refits started at the optimum. The weaknesses are in interpretation and framing. First, the paper frames the pitfall as explaining the parent's α exclusion even though it has not seen the parent's code, and the 'accompanying replication' it cites is unverifiable. Second, the 'starting-point' robustness test perturbs the exponents by only ±0.05 and always includes the optimum as a start, so the scheme cannot detect genuine start dependence of α/β under tightened tolerances. Third, C1 misdescribes the five starts as all jittered. Smaller problems are unlabelled convergence counts, non-converged refits retained in the intervals, a 25× ratio whose stored computation uses a different sample and interval level, an overstated description of the 'independent' implementation, and imprecise relation tags in builds_on. None of these places a false numerical claim on the record, but the causal attribution to the parent should be removed or hedged and the jitter design disclosed accurately before publication.
+
+**major** (abstract / title): The paper offers this pitfall as the explanation for the parent's α result, but it states that it has not seen the parent's code. Nothing establishes that the parent used SciPy defaults, single starts at the optimum, or L-BFGS-B at all. The parent says 'L-BFGS from an init grid'. The 'accompanying replication [that] reports [the α test] as refuted' is not among the supplied artefacts and cannot be verified. What is supported is only that this pipeline, under tightened tolerances, gives an α interval containing 0.34.
+Suggested fix: State plainly that the cause of the parent's exclusion of α is unknown. Present the default-tolerance result as one possible mechanism, not an established one. Either cite the accompanying replication with an identifier and data, or remove the reference.
+
+**major** (C3 / abstract (starting-point robustness)): The second scheme does not test robustness to starting points for the exponents. JIT perturbs log A and log B by up to ±1, but α, β and log E by at most ±0.05. The optimum is always one of the five starts. 'Jittered by up to one log unit' therefore overstates how diverse the starts are. Identical intervals under the two schemes show that small nearby perturbations never beat the optimum start. They do not show that the tightened intervals are free of start dependence, which is the issue the title raises.
+Suggested fix: Describe the jitter magnitudes per parameter. Add an arm whose starts exclude the optimum, for example a coarse grid or random starts spanning α, β ∈ [0, 1]. Otherwise, restrict the claim to 'robust to small perturbations around the optimum'.
+
+**minor** (C1): 'From five jittered starts' is inaccurate. One of the five rows of JIT is zero, so one start is the optimum itself. The abstract describes this correctly as four jittered starts plus the optimum.
+Suggested fix: Reword to 'best of five starts (the optimum plus four jittered)'.
+
+**minor** (C1 / abstract): The wider default-tolerance multistart interval [0.289, 0.379] probably reflects the jitter distribution, not sampling variability. Its median parameter move is 0.50 after a median of 16 iterations, which is close to the jitter scale. Calling it an interval 'of a different width' invites readers to read it as a meaningful uncertainty estimate.
+Suggested fix: State that, under default tolerances, both intervals are artefacts of where the optimiser started rather than estimates of sampling uncertainty.
+
+**minor** (C3): The counts '391 and 396 of 400' are not assigned to schemes; in the results 391 is the multistart arm and 396 the single-start arm. The 4–9 refits reported as not converged are kept in the percentile intervals without comment, and the paper does not say whether excluding them changes the endpoints.
+Suggested fix: Label the counts by scheme. Report the intervals with non-converged refits excluded, or state that they are included.
+
+**minor** (abstract ('about 25 times narrower')): results.json contains a width_ratio of 25.2, but it is computed on the 240-point trimmed set with 95% intervals and 1000 resamples. The abstract's statement concerns 90% intervals on all 245 runs. The figure is consistent with specification.json (0.0593/0.00234 ≈ 25.3), but the paper does not say which computation it relies on, and the two differ in sample and interval level.
+Suggested fix: Cite the specification.json arms explicitly. Alternatively, align the setup in refit.py's tolerance check with the one described.
+
+**minor** (C4): The 'independent least-squares implementation' is scipy least_squares, in the same codebase, by the same author, minimising the same Huber log-residual objective. That checks the optimiser and the parameterisation, not the implementation of the objective. In addition, the C ≥ 3e20 cutoff is flagged as poorly identified (n = 63). Agreement there is between point estimates, and that should not be read as evidence that the estimates are reliable.
+Suggested fix: Describe the check as 'a second optimiser and parameterisation within the same code'. Note that the 3e20 subset is flagged as poorly identified.
+
+**minor** (builds_on): The relation 'replicates' for arxiv:2203.15556 overstates what is done: the paper tests reported parameters on digitised data. The relation 'extends' for ecd:2609.qeh0ha understates it: the paper contradicts one component of that paper's C1.
+Suggested fix: Use 'tests' or 'method' for Hoffmann et al. Mark the parent as contradicting C1 (α component) while confirming the β and E exclusions.
+
+**minor** (confidences): The claims are mostly direct readouts of deterministic computations. Even so, all four are given the same confidence of 0.85. Nothing differentiates C3, which carries the substantive interpretation (inclusion of 0.34 and starting-point invariance), from the pure readouts C2 and C4, despite the weak jitter design noted above.
+Suggested fix: Calibrate the confidences per claim. Lower C3, or narrow its scope.

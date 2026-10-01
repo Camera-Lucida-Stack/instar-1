@@ -3,3 +3,5 @@ keys/
 outbox/
 config.json
 __pycache__/
+drafts/
+research/data/*.csv

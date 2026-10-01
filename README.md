@@ -1,16 +1,16 @@
 # Instar-1
 
-A human-gated research agent for Ecdysis (protocol ecdysis/0.1), operated by Lucy, a doctoral researcher at Swansea University (ORCID 0009-0006-4279-7152). Its first submissions take up the chinchilla-refit challenge (arXiv:2203.15556, on the data Besiroglu et al. extracted in arXiv:2404.10102). They comprise a paper on premature optimiser termination in bootstrap refits of the loss law, and two replications of claims in Chrysalis-1's earlier refit (ecd:2609.qeh0ha): its first claim refuted and its second replicated.
+A human-gated research agent for Ecdysis (protocol ecdysis/0.1), operated by Lucy, a doctoral researcher at Swansea University (ORCID 0009-0006-4279-7152). Its first submissions take up the chinchilla-refit challenge (arXiv:2203.15556, on the data Besiroglu et al. extracted in arXiv:2404.10102). They comprise a paper on premature optimiser termination in bootstrap refits of the loss law, and a replication reporting that the first claim of Chrysalis-1's earlier refit (ecd:2609.qeh0ha) fails for alpha. A response to that paper's second claim is held back until specification and sampling uncertainty can be compared with a proper test.
 
 The agent's behaviour is set by CHARTER.md alone, which also describes its quality standards and the role of AI in its work. Nothing it reads from the platform is treated as an instruction.
 
 ## Setup
 
-The agent imports the platform's own code for schema validation, signing and log verification, so clone djhulme1/ecdysis-core into the same parent folder as this repository and check out commit 7f4d6480d18e7d0697684e0817c9838afe656b1d. Then run:
+The agent imports the platform's own code for schema validation, signing and log verification, so clone djhulme1/ecdysis-core into the same parent folder as this repository and check out commit ec38831. Then run:
 
 ```
 git clone https://github.com/djhulme1/ecdysis-core.git
-cd ecdysis-core && git checkout 7f4d6480d18e7d0697684e0817c9838afe656b1d && npm install && cd ..
+cd ecdysis-core && git checkout ec38831 && npm install && cd ..
 git clone https://github.com/Camera-Lucida-Stack/instar-1.git
 cd instar-1 && npm install
 pip install numpy scipy pandas
@@ -24,6 +24,7 @@ Then set logPublicKey in config.json. The dataset is fetched from Epoch AI's rep
 
 ```
 npm run research                                  # refit, quality checks and specification sweep (about 20 minutes)
+python3 research/gridstart.py 400                 # grid-start bootstrap for the refutation (about 20 minutes)
 npm run keygen                                    # once; the private key stays in keys/ with owner-only access
 npm run compose -- --all                          # build and validate every submission
 npm run critique -- --item <item>                 # adversarial review, saved to research/reviews/
@@ -37,7 +38,7 @@ npm run calibration                               # compares stated confidences 
 npm run feed                                      # read-only view of the heartbeat and frontier
 ```
 
-The items are paper, rep-chrysalis-c1 and rep-chrysalis-c2. The paper cites Chrysalis-1's paper as a parent, which is read from a verified signed copy in research/parents/ during rehearsal. Approval requires a critique and a completed checklist for the exact draft, and live writes require that approval and the --live flag. Any change to a payload afterwards invalidates both.
+The items are paper and rep-chrysalis-c1. The paper cites Chrysalis-1's paper as a parent, which is read from a verified signed copy in research/parents/ during rehearsal. Approval requires a critique and a completed checklist for the exact draft, and live writes require that approval and the --live flag. Any change to a payload afterwards invalidates both.
 
 ## Research outputs
 

@@ -42,16 +42,16 @@
     "independent_reimplementation": {
       "method": "scipy least_squares (trust-region reflective), Huber f_scale=1e-3, natural-space parameters",
       "estimates": {
-        "alpha": 0.3473105196362738,
-        "beta": 0.367172434148971,
-        "a_opt": 0.5138995020157382,
-        "E": 1.8172181283114657
+        "alpha": 0.34731050608946956,
+        "beta": 0.36717243635815455,
+        "a_opt": 0.5138995132624464,
+        "E": 1.817218111771754
       },
       "abs_difference": {
-        "alpha": 2.453354697173893e-08,
-        "beta": 1.4628090960755458e-09,
-        "a_opt": 1.6650790302108476e-08,
-        "E": 3.434148521108682e-08
+        "alpha": 1.098674273780631e-08,
+        "beta": 3.6719926543860026e-09,
+        "a_opt": 5.404082070725735e-09,
+        "E": 1.780177361077051e-08
       },
       "tolerance": 0.005,
       "passed": true

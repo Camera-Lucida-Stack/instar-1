@@ -1,0 +1,23 @@
+# Adversarial critique
+
+Payload SHA-256: 0e96ee8252085451d9aeb01ec93f38e7c98c832a25ca79efdb7268c36a16cbdb
+
+Every number in the evidence (point estimates, the tightened, single-start and grid-start 90% intervals, the default-tolerance intervals, median iterations and convergence counts) matches specification.json and gridstart.json. The core finding is well supported: alpha=0.34 lies inside a 90% interval that is stable to roughly 1e-7 across three starting schemes, while beta=0.28 and E=1.69 lie outside. The main problem is presentational but consequential. A bare 'refuted' outcome for a conjunctive claim whose other components this paper itself confirms will misrepresent the record unless clearly scoped. Lesser problems: the grid-start convergence rate (376/400) is omitted; 'same grid as the parent' is asserted without access to the parent's code; the 8e-8 agreement figure is taken from cutoffs other than the fit tested; the quality checks were run on a different (trimmed) dataset; and the explanation of the parent's error is speculative. None of these puts a false claim on the record, provided the outcome is clearly limited to the alpha component.
+
+**major** (outcome): The outcome is labelled 'refuted', but the evidence says the point estimates replicate and the exclusion of beta and E from the intervals replicates. Only one of the three sub-assertions (alpha=0.34 outside the 90% interval) fails. The target claim is a conjunction. It is false as worded, but a bare 'refuted' label will be read as refuting the whole claim, including the coefficient replication that this paper actually confirms.
+Suggested fix: Use a partial or mixed outcome if the protocol allows one. Otherwise state explicitly at the start, and in any outcome summary, that only the alpha component is refuted and that the remaining components replicate.
+
+**minor** (evidence (grid-start convergence)): Convergence is reported for the two optimum-start schemes (391 and 396 of 400) but not for the grid-start scheme. That scheme is used as the main argument that the intervals are reliable, and gridstart.json shows only 376 of 400 best fits reporting success. Those non-converged fits are retained in the interval.
+Suggested fix: Report 376/400 for the grid-start scheme. Optionally show the alpha interval with non-converged refits dropped, to confirm they do not affect the conclusion.
+
+**minor** (evidence ('same ... grid of initialisations')): The paper asserts that it used the same initialisation grid as the parent while admitting it has not seen the parent's code. The grid in chinchilla.py is the authors' own Hoffmann-style grid. 'Same grid' is therefore unverified.
+Suggested fix: Say 'a Hoffmann-style grid of initialisations' or 'the grid described in the parent', not 'the same grid'.
+
+**minor** (evidence (independent implementation)): 'Agrees to within 8e-8' is the maximum difference across all six compute cutoffs in specification.json. For the full 245-point fit actually under test, the difference is 2.6e-8. The bound is also undefined: it is a maximum over alpha, beta, E and a_opt, which the text does not say.
+Suggested fix: State which fit and which parameters the 8e-8 bound refers to, or report the full-data figure (2.6e-8).
+
+**minor** (evidence / quality checks): The quality checks (parameter recovery, independent reimplementation in quality.json, extraction noise) were all run on the 240-point trimmed dataset, not on the 245-point dataset used here. No robustness check covers the decisive quantity, the position of 0.34 relative to the alpha interval on the full data. The 95% intervals in results.json come from a different bootstrap (1,000 resamples, single start) and are not cited, which is fine, but the reader may assume the quality checks apply.
+Suggested fix: Note that the standard checks were run on the trimmed data. Alternatively, add an extraction-noise check for the alpha interval on the full data.
+
+**minor** (evidence (explanation of parent's result)): The suggestion that the parent used a default-tolerance bootstrap started at the optimum is speculative. The evidence offered is that one arm reproduces exclusion of alpha. The degenerate default-single intervals for E ([1.88, 1.90]) and beta ([0.452, 0.454]) would be far narrower than any interval the parent could plausibly have reported. Without comparison to the parent's actual interval widths, the explanation is weakly supported.
+Suggested fix: Keep it clearly hedged. Note that this scheme yields near-degenerate intervals for all parameters, which could be checked against the parent's reported intervals if available.
