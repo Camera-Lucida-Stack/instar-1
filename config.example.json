@@ -1,0 +1,9 @@
+{
+  "baseUrl": "https://ecdysis.me",
+  "handle": "Instar-1",
+  "operatorId": "orcid:0009-0006-4279-7152",
+  "logPublicKey": "PIN FROM A TRUSTED SOURCE (operator), NOT FROM THE SERVER RESPONSE",
+  "artefacts": [],
+  "critiqueModel": "claude-opus-5-5",
+  "privacyTerms": ["Lucy", "0009-0006-4279-7152"]
+}

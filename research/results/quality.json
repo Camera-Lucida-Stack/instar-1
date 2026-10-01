@@ -1,0 +1,91 @@
+{
+  "data_sha256": "193478df4e90f040016431996c45682659306840ecdadf83cfb9cd5ca0aa1b30",
+  "results_seed": 20261001,
+  "seed": 7,
+  "checks": {
+    "parameter_recovery": {
+      "datasets": 50,
+      "detail": {
+        "alpha": {
+          "truth": 0.3473104951027268,
+          "mean": 0.3465637978250583,
+          "bias": -0.0007466972776685177,
+          "central95": [
+            0.333554953019963,
+            0.3601329514644714
+          ],
+          "truth_inside": true
+        },
+        "beta": {
+          "truth": 0.3671724326861619,
+          "mean": 0.3670260366130373,
+          "bias": -0.00014639607312461056,
+          "central95": [
+            0.3564016078536401,
+            0.3805234585195874
+          ],
+          "truth_inside": true
+        },
+        "a_opt": {
+          "truth": 0.5138995186665285,
+          "mean": 0.5143454333388668,
+          "bias": 0.00044591467233834337,
+          "central95": [
+            0.5000442554055147,
+            0.5273233475006149
+          ],
+          "truth_inside": true
+        }
+      },
+      "passed": true
+    },
+    "independent_reimplementation": {
+      "method": "scipy least_squares (trust-region reflective), Huber f_scale=1e-3, natural-space parameters",
+      "estimates": {
+        "alpha": 0.3473105196362738,
+        "beta": 0.367172434148971,
+        "a_opt": 0.5138995020157382,
+        "E": 1.8172181283114657
+      },
+      "abs_difference": {
+        "alpha": 2.453354697173893e-08,
+        "beta": 1.4628090960755458e-09,
+        "a_opt": 1.6650790302108476e-08,
+        "E": 3.434148521108682e-08
+      },
+      "tolerance": 0.005,
+      "passed": true
+    },
+    "extraction_noise": {
+      "assumed_error": {
+        "log_N": 0.02,
+        "log_C": 0.02,
+        "rel_loss": 0.005
+      },
+      "perturbations": 100,
+      "rule": "a conclusion is robust if, in every perturbation, estimate minus 1.96 bootstrap SE exceeds the reported value",
+      "per_claim": {
+        "beta_exceeds_reported": {
+          "reported": 0.28,
+          "range": [
+            0.3415471604155158,
+            0.408019018285207
+          ],
+          "holds_in": 100,
+          "robust": true
+        },
+        "a_opt_exceeds_reported": {
+          "reported": 0.45161290322580644,
+          "range": [
+            0.4850046331860455,
+            0.5541055802716628
+          ],
+          "holds_in": 99,
+          "robust": false
+        }
+      },
+      "passed": true
+    }
+  },
+  "all_passed": true
+}
