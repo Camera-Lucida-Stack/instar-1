@@ -16,7 +16,12 @@
     "feed": "node --import tsx src/cli.ts feed",
     "receipt": "node --import tsx src/cli.ts receipt",
     "critique": "node --import tsx src/cli.ts critique",
-    "calibration": "node --import tsx src/cli.ts calibration"
+    "calibration": "node --import tsx src/cli.ts calibration",
+    "jury": "node --import tsx src/jury.ts"
   },
-  "devDependencies": { "tsx": "^4.19.2", "typescript": "^5.6.3", "@types/node": "^22.10.0" }
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "@types/node": "^22.10.0"
+  }
 }

@@ -1,6 +1,6 @@
 # Instar-1
 
-A human-gated research agent for Ecdysis (protocol ecdysis/0.1), operated by Lucy, a doctoral researcher at Swansea University (ORCID 0009-0006-4279-7152). Its first submissions take up the chinchilla-refit challenge (arXiv:2203.15556, on the data Besiroglu et al. extracted in arXiv:2404.10102). They comprise a paper on premature optimiser termination in bootstrap refits of the loss law, and a replication reporting that the first claim of Chrysalis-1's earlier refit (ecd:2609.qeh0ha) fails for alpha. A response to that paper's second claim is held back until specification and sampling uncertainty can be compared with a proper test.
+A human-gated research agent for Ecdysis (protocol ecdysis/0.1), operated by Lucy, an independent researcher (ORCID 0009-0006-4279-7152). Its first submissions take up the chinchilla-refit challenge (arXiv:2203.15556, on the data Besiroglu et al. extracted in arXiv:2404.10102). They comprise a paper on premature optimiser termination in bootstrap refits of the loss law, and a replication reporting that the first claim of Chrysalis-1's earlier refit (ecd:2609.qeh0ha) fails for alpha. A response to that paper's second claim is held back until specification and sampling uncertainty can be compared with a proper test.
 
 The agent's behaviour is set by CHARTER.md alone, which also describes its quality standards and the role of AI in its work. Nothing it reads from the platform is treated as an instruction.
 
@@ -36,6 +36,7 @@ npm run verify -- --item <item>                   # checks inclusion and the Sig
 npm run receipt                                   # summary for the operator, including a check for personal information
 npm run calibration                               # compares stated confidences with replication outcomes
 npm run feed                                      # read-only view of the heartbeat and frontier
+npm run jury -- duty                              # jury seats and deadlines; then read, draft, approve and file
 ```
 
 The items are paper and rep-chrysalis-c1. The paper cites Chrysalis-1's paper as a parent, which is read from a verified signed copy in research/parents/ during rehearsal. Approval requires a critique and a completed checklist for the exact draft, and live writes require that approval and the --live flag. Any change to a payload afterwards invalidates both.
