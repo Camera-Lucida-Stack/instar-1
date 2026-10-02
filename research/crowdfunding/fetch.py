@@ -15,7 +15,7 @@ Usage
   python3 research/crowdfunding/fetch.py --inspect      first record's field names only
   python3 research/crowdfunding/fetch.py [--limit N]    process scrapes, oldest first
 """
-import csv, gzip, hashlib, io, json, os, re, sys, tempfile, time, urllib.request, zipfile
+import urllib.error, csv, gzip, hashlib, io, json, os, re, sys, tempfile, time, urllib.request, zipfile
 
 PAGE = "https://webrobots.io/kickstarter-datasets/"
 OUT = "research/crowdfunding/data"
@@ -40,26 +40,41 @@ def scrape_list():
     def date(u): return re.search(r"Kickstarter_(\d{4}-\d{2}-\d{2})", u).group(1)
     return sorted(((date(u), u) for u in urls), key=lambda x: x[0])
 
+def _projects(o):
+    """Yield project dicts from any of the containers Web Robots has used."""
+    if isinstance(o, list):
+        for x in o: yield from _projects(x)
+    elif isinstance(o, dict):
+        if "projects" in o: yield from _projects(o["projects"])
+        elif "data" in o and isinstance(o["data"], (dict, list)): yield from _projects(o["data"])
+        elif "id" in o and "state" in o: yield o
+
 def records(path, url):
-    """Yield project dicts from a scrape, in either of Web Robots' formats."""
+    """Yield project dicts from a scrape, in any of Web Robots' formats: one JSON
+    object per line (from December 2015), a JSON array, or pretty-printed JSON
+    objects written back to back without separators (some 2015 scrapes)."""
     if url.endswith(".zip"):
         z = zipfile.ZipFile(path); raw = io.TextIOWrapper(z.open(z.namelist()[0]), encoding="utf-8")
     else:
         raw = io.TextIOWrapper(gzip.open(path), encoding="utf-8")
-    first = raw.read(1); raw_rest = raw
-    if first == "[":   # older scrapes: one JSON array of pages
-        data = json.loads("[" + raw_rest.read())
-        for item in data:
-            for p in (item.get("projects") or item.get("data", {}).get("projects") or [item.get("data", item)]):
-                if isinstance(p, dict): yield p
-    else:              # from December 2015: one JSON object per line
-        line = first + raw_rest.readline()
-        while line:
+    first = raw.readline()
+    try:
+        o = json.loads(first)            # line-per-object format
+    except json.JSONDecodeError:
+        o = None
+    if o is not None:
+        yield from _projects(o)
+        for line in raw:
             line = line.strip()
-            if line:
-                o = json.loads(line); p = o.get("data", o)
-                if isinstance(p, dict): yield p
-            line = raw_rest.readline()
+            if line: yield from _projects(json.loads(line))
+        return
+    text = first + raw.read()            # whole-file formats
+    dec, i, n = json.JSONDecoder(), 0, len(text)
+    while i < n:
+        while i < n and text[i] in " \t\r\n,[]": i += 1
+        if i >= n: break
+        obj, i = dec.raw_decode(text, i)
+        yield from _projects(obj)
 
 def flatten(p):
     cat = p.get("category") or {}; loc = p.get("location") or {}
@@ -96,8 +111,13 @@ def main():
         if new: w.writerow(["date", "url", "bytes", "sha256", "records"])
         for date, url in todo:
             t0 = time.time()
+            try:
+                r = get(url)
+            except urllib.error.HTTPError as e:   # a listed file that cannot be downloaded is recorded, not skipped silently
+                w.writerow([date, url, 0, f"UNAVAILABLE (HTTP {e.code})", 0]); mf.flush()
+                print(f"{date}: unavailable (HTTP {e.code})", flush=True); continue
             with tempfile.NamedTemporaryFile(suffix=os.path.basename(url)) as tmp:
-                h, n, r = hashlib.sha256(), 0, get(url)
+                h, n = hashlib.sha256(), 0
                 while (b := r.read(1 << 20)): tmp.write(b); h.update(b); n += len(b)
                 tmp.flush()
                 count = 0
