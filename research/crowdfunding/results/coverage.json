@@ -1,0 +1,5 @@
+{
+  "scrapes_processed": 137,
+  "distinct_projects": 643007,
+  "note": "Counts only; outcomes are not examined here. largest_single_scrape_share is the largest number of a launch year's projects seen in any one scrape, divided by the distinct projects from that year found across all scrapes."
+}
