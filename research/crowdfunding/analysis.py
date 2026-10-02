@@ -231,6 +231,15 @@ def big_goals(df):
     return {int(y): dict(projects=int(len(g)), success_share=float(g["success"].mean())) for y, g in d.groupby("year")}
 
 # ---------------------------------------------------------------- quality checks
+def newton(X, y, iters=100):
+    """Logistic regression by Newton-Raphson, independent of statsmodels; returns coefficients and model-based SEs."""
+    b = np.zeros(X.shape[1])
+    for _ in range(iters):
+        mu = 1 / (1 + np.exp(-(X @ b))); W = mu * (1 - mu)
+        H = X.T @ (X * W[:, None]); step = np.linalg.solve(H, X.T @ (y - mu)); b += step
+        if np.max(np.abs(step)) < 1e-10: break
+    return b, np.sqrt(np.diag(np.linalg.inv(H)))
+
 def quality(df, rng):
     d = sample(df); dd = d[(d["goal_usd"] >= 5000) & d["duration"].notna()].reset_index(drop=True)
     m, _ = logit(dd, BASE)
@@ -241,18 +250,15 @@ def quality(df, rng):
     p = 1 / (1 + np.exp(-(X @ beta)))
     for _ in range(SIMS):
         y = rng.binomial(1, p)
-        r = sm.GLM(y, X, family=sm.families.Binomial()).fit(cov_type="HC1"); ci = r.conf_int()
+        b, se = newton(X, y)                                   # light-weight fit; statsmodels retained memory across refits
         for k, j in keys.items():
-            est[k].append(r.params[j]); cover[k] += int(ci[j, 0] <= beta[j] <= ci[j, 1])
+            est[k].append(b[j]); cover[k] += int(b[j] - 1.96 * se[j] <= beta[j] <= b[j] + 1.96 * se[j])
+        gc.collect()
     rec = {k: dict(truth=float(beta[j]), mean=float(np.mean(est[k])), coverage=cover[k] / SIMS) for k, j in keys.items()}
     floor = 0.95 - 2 * np.sqrt(0.95 * 0.05 / SIMS)            # two binomial standard errors below nominal coverage
     rec_pass = all(abs(v["mean"] - v["truth"]) <= 0.1 * abs(v["truth"]) + 1e-3 and v["coverage"] >= floor for v in rec.values())
     # 2. independent implementation: Newton-Raphson written here, without statsmodels
-    b = np.zeros(X.shape[1]); y = dd["success"].to_numpy()
-    for _ in range(100):
-        mu = 1 / (1 + np.exp(-(X @ b))); W = mu * (1 - mu)
-        step = np.linalg.solve(X.T @ (X * W[:, None]), X.T @ (y - mu)); b += step
-        if np.max(np.abs(step)) < 1e-10: break
+    y = dd["success"].to_numpy(); b, _ = newton(X, y)
     diff = {k: float(abs(b[j] - beta[j])) for k, j in keys.items()}
     desc = sample(df); r = desc.loc[desc["success"] == 1, "ratio"].to_numpy()
     q_np, q_pd = float(np.percentile(r, 25)), float(pd.Series(r).quantile(0.25))
