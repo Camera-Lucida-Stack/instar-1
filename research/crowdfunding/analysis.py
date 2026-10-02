@@ -11,7 +11,7 @@ Outputs  research/crowdfunding/results/analysis.json
 
 Usage    python3 research/crowdfunding/analysis.py [--boot N] [--sims N] [--no-per-scrape]
 """
-import glob, json, os, sys, warnings
+import gc, glob, json, os, sys, warnings
 import numpy as np, pandas as pd
 import statsmodels.formula.api as smf
 import statsmodels.api as sm
@@ -43,15 +43,23 @@ def prepare(df):
     df["duration"] = (df["deadline"] - df["launched_at"]) / 86400.0
     df["success"] = (df["state"] == "successful").astype(int)
     df["featured"] = df["staff_pick"].astype(str).str.lower().isin(["true", "1"]).astype(int)
-    cat = df["category_parent"].where(df["category_parent"].notna() & (df["category_parent"] != ""),
-                                      df["category_slug"].astype(str).str.split("/").str[0])
-    df["category"] = cat.fillna("unknown")
+    # Kickstarter's top-level category, taken consistently from the slug ("games/tabletop games" -> "games"),
+    # because parent_name is recorded only for sub-categories and would otherwise split each category in two.
+    df["category"] = df["category_slug"].astype(str).str.split("/").str[0].str.strip().str.lower().replace({"nan": "unknown", "": "unknown"})
     df["video"] = df["has_video"].map({"True": 1, "False": 0, True: 1, False: 0})
-    return df[(df["launched_at"] > 0) & (df["goal"] > 0) & df["year"].notna()]
+    df = df[(df["launched_at"] > 0) & (df["goal"] > 0) & df["year"].notna()]
+    # keep only what the analysis uses, in compact types, so that repeated samples stay small in memory
+    out = pd.DataFrame({"state": df["state"].astype("category"), "country": df["country"].astype("category"),
+                        "category": df["category"].astype("category"), "goal_usd": df["goal_usd"].astype("float64"),
+                        "ratio": df["ratio"].astype("float64"), "year": df["year"].astype("int16"),
+                        "duration": df["duration"].astype("float32"), "success": df["success"].astype("int8"),
+                        "featured": df["featured"].astype("int8"), "video": df["video"].astype("float32")})
+    return out.reset_index(drop=True)
 
 def load(path):
     df = pd.read_csv(path, dtype=str, usecols=lambda c: c in COLS)
-    return prepare(df.drop_duplicates("id", keep="last"))
+    out = prepare(df.drop_duplicates("id", keep="last")); del df; gc.collect()
+    return out
 
 def cpi_table():
     p = f"{RES}/cpi.csv"
@@ -61,6 +69,7 @@ def cpi_table():
 def sample(df, *, cancelled_fail=False, all_countries=False, lo=100, hi=1e6, cpi=None):
     states = ["successful", "failed"] + (["canceled", "cancelled"] if cancelled_fail else [])
     d = df[df["state"].isin(states) & df["goal_usd"].notna()].copy()
+    d["category"] = d["category"].cat.remove_unused_categories()
     if not all_countries: d = d[d["country"] == "US"]
     if cpi:
         f = d["year"].map(lambda y: cpi.get(int(y), np.nan) / cpi[2012])
@@ -203,7 +212,7 @@ def sensitivity(df, rng, cpi):
     if cpi: v["inflation_adjusted"] = dict(cpi=cpi)
     out = {}
     for k, kw in v.items():
-        d = sample(df, **kw)
+        gc.collect(); d = sample(df, **kw)
         out[k] = headline(dict(h1=h1(d, rng, 0), h1a=h1a(d, rng, 0), h2=h2(d, rng, 0), reg=regressions(d)))
     full = sample(df); full_reg = full[full["duration"].notna()]
     _, o = logit(full_reg, BASE)
