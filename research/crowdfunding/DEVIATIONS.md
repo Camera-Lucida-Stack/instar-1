@@ -21,3 +21,15 @@
 **What changed.** The pre-registration reports coverage only from the scrapes themselves. To judge how complete the combined data are, the number of distinct launched projects in the data is compared with the total of launched projects that Kickstarter publishes on its statistics page, retrieved and archived on the day of comparison. Only counts of launched projects are compared; no outcomes are examined or compared.
 
 **Why.** The coverage table shows that no single scrape after 2013 contains every project launched in a year, so completeness depends on combining scrapes. An external count is the most direct check available.
+
+## 4. The live-capture test, and staff picks at first sight (3 October 2026)
+
+**What changed.** Two analyses are added after the results were seen, so both are exploratory and are reported as such.
+
+First, each project is classed as captured live if the first scrape in which it appears was taken before its campaign ended. Such projects were collected before their outcome was known, so their inclusion cannot depend on whether they succeeded. Findings H1 and H2 are re-estimated on them by launch year, and the regressions are re-estimated on them pooled. Because scraping began in April 2014, live capture is possible only for projects launched from 2014.
+
+Second, each project's staff-pick status is also taken from the first scrape in which it appears, and the regressions are re-estimated with that version.
+
+**Why.** The adversarial review pointed out that successes greatly outnumber failures in the sample from 2019 onwards, while 2009 to 2013 is close to balanced, which suggests that recent failed projects are under-represented because Kickstarter limits how many past projects it displays. If projects that remain visible are disproportionately well funded, the apparent rise in overfunding could arise from sampling. Separately, a project's staff-pick status in its latest record may have been awarded after its campaign succeeded.
+
+**Decision rule, fixed before running.** The overfunding trend is treated as supported if, among live-captured successful projects, both the median funding ratio and the share raising at least twice their goal rise by at least 0.05 from launch years 2014 to 2016 to launch years 2024 to 2026, with 95% bootstrap intervals for both differences excluding zero. Otherwise the paper will report that the trend cannot be distinguished from a sampling effect.
