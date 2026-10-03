@@ -1,0 +1,40 @@
+{
+  "parameter_recovery": {
+    "simulations": 50,
+    "detail": {
+      "log_goal": {
+        "truth": -0.5915900578776315,
+        "mean": -0.5916688254622228,
+        "coverage": 0.92
+      },
+      "duration": {
+        "truth": -0.023356215614238687,
+        "mean": -0.023508126168633892,
+        "coverage": 0.94
+      },
+      "featured": {
+        "truth": 2.9728778081429454,
+        "mean": 2.9668335358757054,
+        "coverage": 0.9
+      }
+    },
+    "passed": true
+  },
+  "independent_implementation": {
+    "max_abs_coefficient_difference": {
+      "log_goal": 2.2537527399890678e-14,
+      "duration": 1.0234868508263162e-15,
+      "featured": 8.255618411112664e-13
+    },
+    "quantile_check": [
+      1.0653642466668058,
+      1.0653642466668058
+    ],
+    "passed": true
+  },
+  "specification_sensitivity": {
+    "passed": true,
+    "note": "reported per variant in analysis.json"
+  },
+  "all_passed": true
+}
