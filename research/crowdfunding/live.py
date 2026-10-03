@@ -24,11 +24,12 @@ for f in sorted(glob.glob(f"{EX}/20*.csv.gz")):                      # oldest fi
 raw["first_pick"] = raw["id"].map(first_pick)
 d0 = raw.copy(); out = A.prepare(d0)
 mask = (d0["launched_at"] > 0) & (d0["goal"] > 0) & d0["year"].notna()
-seen = pd.to_datetime(d0.loc[mask, "first_seen"], utc=True, errors="coerce").astype("int64") // 10**9
+seen = (pd.to_datetime(d0.loc[mask, "first_seen"], utc=True, errors="coerce") - pd.Timestamp(0, tz="UTC")) // pd.Timedelta(seconds=1)   # seconds since 1970, independent of the datetime unit
 out["live"] = (seen.to_numpy() < d0.loc[mask, "deadline"].to_numpy()).astype(int)
 out["featured_first"] = d0.loc[mask, "first_pick"].astype(str).str.lower().isin(["true", "1"]).astype("int8").to_numpy()
 
 full = A.sample(out); live = full[full["live"] == 1]
+assert full.loc[full["year"] <= 2013, "live"].sum() == 0, "no project launched before scraping began can have been captured live"
 def h2s(g): r = g.loc[g["success"] == 1, "ratio"].to_numpy(); return (float(np.median(r)), float(np.mean(r >= 2))) if len(r) else (None, None)
 def h1s(g): r = g.loc[g["success"] == 0, "ratio"].to_numpy(); return (float(np.mean(r)), float(np.mean(r >= 0.5))) if len(r) else (None, None)
 years = {}
