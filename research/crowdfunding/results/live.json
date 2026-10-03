@@ -1,0 +1,364 @@
+{
+  "rule": "supported if, among live-captured successful projects, the median funding ratio and the share at 2x or more each rise by at least 0.05 from 2014-2016 to 2024-2026, with 95% bootstrap intervals excluding zero",
+  "live_projects": 357835,
+  "trend": {
+    "n_2014_2016": 42706,
+    "n_2024_2026": 26604,
+    "median_2014_2016": 1.1805,
+    "median_2024_2026": 2.136375,
+    "share200_2014_2016": 0.20591954292136935,
+    "share200_2024_2026": 0.5219515862276349,
+    "median_difference": {
+      "estimate": 0.955875,
+      "ci": [
+        0.9126944318181819,
+        1.0045443749999998
+      ]
+    },
+    "share200_difference": {
+      "estimate": 0.31603204330626555,
+      "ci": [
+        0.30947015168301334,
+        0.32304305543259654
+      ]
+    },
+    "supported": true
+  },
+  "by_year": {
+    "2009": {
+      "projects": 1170,
+      "live": 1170,
+      "live_share": 1.0,
+      "success_share_all": 0.48376068376068376,
+      "success_share_live": 0.48376068376068376,
+      "h2_median_all": 1.1062744360902257,
+      "h2_share200_all": 0.08833922261484099,
+      "h2_median_live": 1.1062744360902257,
+      "h2_share200_live": 0.08833922261484099,
+      "h1_mean_live": 0.09934313223768967,
+      "h1_share50_live": 0.03642384105960265
+    },
+    "2010": {
+      "projects": 9603,
+      "live": 9603,
+      "live_share": 1.0,
+      "success_share_all": 0.47589295011975424,
+      "success_share_live": 0.47589295011975424,
+      "h2_median_all": 1.096,
+      "h2_share200_all": 0.06039387308533917,
+      "h2_median_live": 1.096,
+      "h2_share200_live": 0.06039387308533917,
+      "h1_mean_live": 0.10238848940905472,
+      "h1_share50_live": 0.03278362805483807
+    },
+    "2011": {
+      "projects": 24121,
+      "live": 24121,
+      "live_share": 1.0,
+      "success_share_all": 0.5025496455370839,
+      "success_share_live": 0.5025496455370839,
+      "h2_median_all": 1.1056633333333332,
+      "h2_share200_all": 0.0743276687015344,
+      "h2_median_live": 1.1056633333333332,
+      "h2_share200_live": 0.0743276687015344,
+      "h1_mean_live": 0.10632163883212462,
+      "h1_share50_live": 0.03375281273439453
+    },
+    "2012": {
+      "projects": 37967,
+      "live": 37967,
+      "live_share": 1.0,
+      "success_share_all": 0.4636658150499118,
+      "success_share_live": 0.4636658150499118,
+      "h2_median_all": 1.128,
+      "h2_share200_all": 0.11667802772097251,
+      "h2_median_live": 1.128,
+      "h2_share200_live": 0.11667802772097251,
+      "h1_mean_live": 0.1083360780771388,
+      "h1_share50_live": 0.038059225065069
+    },
+    "2013": {
+      "projects": 36358,
+      "live": 36358,
+      "live_share": 1.0,
+      "success_share_all": 0.4908685846306177,
+      "success_share_live": 0.4908685846306177,
+      "h2_median_all": 1.1473846153846154,
+      "h2_share200_all": 0.1541435535384098,
+      "h2_median_live": 1.1473846153846154,
+      "h2_share200_live": 0.1541435535384098,
+      "h1_mean_live": 0.12176525867968646,
+      "h1_share50_live": 0.043865809518664575
+    },
+    "2014": {
+      "projects": 43952,
+      "live": 43952,
+      "live_share": 1.0,
+      "success_share_all": 0.38903804149981797,
+      "success_share_live": 0.38903804149981797,
+      "h2_median_all": 1.1585,
+      "h2_share200_all": 0.17217381133399615,
+      "h2_median_live": 1.1585,
+      "h2_share200_live": 0.17217381133399615,
+      "h1_mean_live": 0.08931236252372458,
+      "h1_share50_live": 0.03392544594644919
+    },
+    "2015": {
+      "projects": 36537,
+      "live": 36537,
+      "live_share": 1.0,
+      "success_share_all": 0.4003339080931658,
+      "success_share_live": 0.4003339080931658,
+      "h2_median_all": 1.1784,
+      "h2_share200_all": 0.20421138989539891,
+      "h2_median_live": 1.1784,
+      "h2_share200_live": 0.20421138989539891,
+      "h1_mean_live": 0.06883586141190631,
+      "h1_share50_live": 0.027110908261068007
+    },
+    "2016": {
+      "projects": 24322,
+      "live": 24322,
+      "live_share": 1.0,
+      "success_share_all": 0.45144313789984375,
+      "success_share_live": 0.45144313789984375,
+      "h2_median_all": 1.2309485738980122,
+      "h2_share200_all": 0.26074681238615666,
+      "h2_median_live": 1.2309485738980122,
+      "h2_share200_live": 0.26074681238615666,
+      "h1_mean_live": 0.07645066147955831,
+      "h1_share50_live": 0.028031779343426773
+    },
+    "2017": {
+      "projects": 21469,
+      "live": 21469,
+      "live_share": 1.0,
+      "success_share_all": 0.5596441380595277,
+      "success_share_live": 0.5596441380595277,
+      "h2_median_all": 1.26,
+      "h2_share200_all": 0.2823137744486059,
+      "h2_median_live": 1.26,
+      "h2_share200_live": 0.2823137744486059,
+      "h1_mean_live": 0.08625219220551329,
+      "h1_share50_live": 0.036386714618151045
+    },
+    "2018": {
+      "projects": 17919,
+      "live": 17919,
+      "live_share": 1.0,
+      "success_share_all": 0.6425023717841397,
+      "success_share_live": 0.6425023717841397,
+      "h2_median_all": 1.3091666666666666,
+      "h2_share200_all": 0.30878137757317814,
+      "h2_median_live": 1.3091666666666666,
+      "h2_share200_live": 0.30878137757317814,
+      "h1_mean_live": 0.10410959397696544,
+      "h1_share50_live": 0.050889790821105216
+    },
+    "2019": {
+      "projects": 16495,
+      "live": 16495,
+      "live_share": 1.0,
+      "success_share_all": 0.6966959684752956,
+      "success_share_live": 0.6966959684752956,
+      "h2_median_all": 1.3828749999999999,
+      "h2_share200_all": 0.3548555516881309,
+      "h2_median_live": 1.3828749999999999,
+      "h2_share200_live": 0.3548555516881309,
+      "h1_mean_live": 0.10167927827299533,
+      "h1_share50_live": 0.04637217669398361
+    },
+    "2020": {
+      "projects": 14281,
+      "live": 14281,
+      "live_share": 1.0,
+      "success_share_all": 0.739934178278832,
+      "success_share_live": 0.739934178278832,
+      "h2_median_all": 1.84,
+      "h2_share200_all": 0.4718463139964039,
+      "h2_median_live": 1.84,
+      "h2_share200_live": 0.4718463139964039,
+      "h1_mean_live": 0.10540264024681978,
+      "h1_share50_live": 0.04738826063543349
+    },
+    "2021": {
+      "projects": 12911,
+      "live": 12911,
+      "live_share": 1.0,
+      "success_share_all": 0.7901789172023855,
+      "success_share_live": 0.7901789172023855,
+      "h2_median_all": 1.7492095,
+      "h2_share200_all": 0.4516761419329543,
+      "h2_median_live": 1.7492095,
+      "h2_share200_live": 0.4516761419329543,
+      "h1_mean_live": 0.10660849915372014,
+      "h1_share50_live": 0.051310446659283866
+    },
+    "2022": {
+      "projects": 11714,
+      "live": 11714,
+      "live_share": 1.0,
+      "success_share_all": 0.7462011268567526,
+      "success_share_live": 0.7462011268567526,
+      "h2_median_all": 1.656,
+      "h2_share200_all": 0.4347328680928956,
+      "h2_median_live": 1.656,
+      "h2_share200_live": 0.4347328680928956,
+      "h1_mean_live": 0.11824549009731411,
+      "h1_share50_live": 0.08072653884964683
+    },
+    "2023": {
+      "projects": 12051,
+      "live": 12051,
+      "live_share": 1.0,
+      "success_share_all": 0.745581279561862,
+      "success_share_live": 0.745581279561862,
+      "h2_median_all": 1.6732666666666667,
+      "h2_share200_all": 0.4415136338341681,
+      "h2_median_live": 1.6732666666666667,
+      "h2_share200_live": 0.4415136338341681,
+      "h1_mean_live": 0.1340971984595789,
+      "h1_share50_live": 0.09230267449445531
+    },
+    "2024": {
+      "projects": 14222,
+      "live": 14222,
+      "live_share": 1.0,
+      "success_share_all": 0.7157924342567853,
+      "success_share_live": 0.7157924342567853,
+      "h2_median_all": 2.0581666666666667,
+      "h2_share200_all": 0.5095284872298624,
+      "h2_median_live": 2.0581666666666667,
+      "h2_share200_live": 0.5095284872298624,
+      "h1_mean_live": 0.11437843504761225,
+      "h1_share50_live": 0.06803562592775854
+    },
+    "2025": {
+      "projects": 14274,
+      "live": 14274,
+      "live_share": 1.0,
+      "success_share_all": 0.704777917892672,
+      "success_share_live": 0.704777917892672,
+      "h2_median_all": 2.14085,
+      "h2_share200_all": 0.522962226640159,
+      "h2_median_live": 2.14085,
+      "h2_share200_live": 0.522962226640159,
+      "h1_mean_live": 0.10234312411400592,
+      "h1_share50_live": 0.04817275747508306
+    },
+    "2026": {
+      "projects": 8469,
+      "live": 8469,
+      "live_share": 1.0,
+      "success_share_all": 0.7514464517652616,
+      "success_share_live": 0.7514464517652616,
+      "h2_median_all": 2.2612703703703705,
+      "h2_share200_all": 0.5402262727844123,
+      "h2_median_live": 2.2612703703703705,
+      "h2_share200_live": 0.5402262727844123,
+      "h1_mean_live": 0.10748964893919846,
+      "h1_share50_live": 0.04703087885985748
+    }
+  },
+  "regressions": {
+    "live_latest_pick": {
+      "n": 193050,
+      "h3": {
+        "odds_ratio": 0.5534465726457837,
+        "ci": [
+          0.5467127920063289,
+          0.5602632922659304
+        ],
+        "mollick": 0.23,
+        "ratio_to_mollick": 2.406289446286016,
+        "outcome": "replicated"
+      },
+      "h4": {
+        "odds_ratio": 0.9769144296121911,
+        "ci": [
+          0.9760592722057164,
+          0.977770336249999
+        ],
+        "mollick": 0.99,
+        "ratio_to_mollick": 0.9867822521335263,
+        "outcome": "replicated"
+      },
+      "h5": {
+        "odds_ratio": 19.548094392340403,
+        "ci": [
+          18.745813010777542,
+          20.384711730142257
+        ],
+        "mollick": 20.47,
+        "ratio_to_mollick": 0.9549630870708551,
+        "outcome": "replicated"
+      }
+    },
+    "live_first_pick": {
+      "n": 193050,
+      "h3": {
+        "odds_ratio": 0.6024373324522662,
+        "ci": [
+          0.5955545945136759,
+          0.6093996131934268
+        ],
+        "mollick": 0.23,
+        "ratio_to_mollick": 2.6192927497924616,
+        "outcome": "replicated"
+      },
+      "h4": {
+        "odds_ratio": 0.9765926861011414,
+        "ci": [
+          0.9757712278624846,
+          0.9774148358888197
+        ],
+        "mollick": 0.99,
+        "ratio_to_mollick": 0.9864572586880216,
+        "outcome": "replicated"
+      },
+      "h5": {
+        "odds_ratio": 23.714852007195052,
+        "ci": [
+          22.14049041541436,
+          25.401162990121506
+        ],
+        "mollick": 20.47,
+        "ratio_to_mollick": 1.158517440507819,
+        "outcome": "replicated"
+      }
+    },
+    "all_first_pick": {
+      "n": 193050,
+      "h3": {
+        "odds_ratio": 0.6024373324522662,
+        "ci": [
+          0.5955545945136759,
+          0.6093996131934268
+        ],
+        "mollick": 0.23,
+        "ratio_to_mollick": 2.6192927497924616,
+        "outcome": "replicated"
+      },
+      "h4": {
+        "odds_ratio": 0.9765926861011414,
+        "ci": [
+          0.9757712278624846,
+          0.9774148358888197
+        ],
+        "mollick": 0.99,
+        "ratio_to_mollick": 0.9864572586880216,
+        "outcome": "replicated"
+      },
+      "h5": {
+        "odds_ratio": 23.714852007195052,
+        "ci": [
+          22.14049041541436,
+          25.401162990121506
+        ],
+        "mollick": 20.47,
+        "ratio_to_mollick": 1.158517440507819,
+        "outcome": "replicated"
+      }
+    }
+  }
+}
